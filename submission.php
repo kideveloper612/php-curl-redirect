@@ -1,5 +1,5 @@
 <?php
-   if(isset($_POST['lead_id'])){
+    if(isset($_POST['lead_id'])){
     $lead_id = $_POST['lead_id'];
     $gender = $_POST['gender'];
     $firstname = $_POST['firstname'];
@@ -30,33 +30,48 @@
     );
     file_put_contents('test.txt', serialize($form_data));
     $params = http_build_query($form_data);
-    $ch = curl_init();
     if( strlen($panel[0]) == 36){
         if ($panel[0] == $panel_val1){
-            $url = "https://www.mb102.com/lnk.asp?o=8012&c=918277&a=362642&k=23FBB52312A104CA76138A4B6E5305B6&l=6724&s1=facegroup";
-            curl_setopt($ch, CURLOPT_URL, $url);
+            $url = "https://www.mb102.com/lnk.asp?o=8012&c=918277&a=362642&k=23FBB52312A104CA76138A4B6E5305B6&l=6724&s1=facegroup&";
         }
         else if($panel[0] == $panel_val2){
-        curl_setopt($ch, CURLOPT_URL,"http://website2.com");
+            $url = "http://website2.com".$params;
         }
         else{
-        curl_setopt($ch, CURLOPT_URL,"http://website3.com");
+            $url = "http://website3.com".$params;
         }
     }
-    curl_setopt($ch,CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    // curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch,CURLOPT_POSTFIELDS, $params);
-    // curl_setopt($ch, CURLOPT_POSTREDIR, 3);
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch,CURLOPT_ENCODING, "");
-    curl_setopt($ch,CURLOPT_MAXREDIRS, 10);
-    curl_setopt($ch,CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-    curl_setopt($ch,CURLOPT_TIMEOUT, 0);
+
+    function curl_request($request_url, $params) {
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $request_url.$params);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        // curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch,CURLOPT_TIMEOUT, 0);
+
+        curl_exec($ch);
+        $info = curl_getinfo($ch);
+        $final_url = $info['url'];
+        $redirect_url = $info['redirect_url'];
+
+        if (!empty($redirect_url)) {
+            return curl_request($redirect_url, $params);
+        }
+        
+        if (strpos($final_url, "127.0.0.1") !== false ) {
+            return ("The final url is <strong>".$final_url.'</strong><br>So this request was not successed unfortunately!<br><h2>If you access from New Zealand, request would be successed!</h2>');
+        } else {
+            return "The final url is: <strong>".$final_url."</strong>";
+        }
+        curl_close($ch);
+    }
     
-    $output = curl_exec($ch);
-    curl_close($ch);
-    echo($output);
+    $result = curl_request($url, $params);
+    echo($result);
+    
     // header("Location: http://localhost/html-contact-form/thank-you.html");
 }
 
