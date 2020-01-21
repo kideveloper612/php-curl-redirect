@@ -32,7 +32,7 @@
     $params = http_build_query($form_data);
     if( strlen($panel[0]) == 36){
         if ($panel[0] == $panel_val1){
-            $url = "https://www.mb102.com/lnk.asp?o=8012&c=918277&a=362642&k=23FBB52312A104CA76138A4B6E5305B6&l=6724&s1=facegroup&";
+            $url = "https://www.mb103.com/lnk.asp?o=15437&c=918277&a=362642&k=8E9B8845B1028BAA93889D2696048DA7&l=16316&s1=blog";
         }
         else if($panel[0] == $panel_val2){
             $url = "http://website2.com".$params;
@@ -52,27 +52,30 @@
         curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch,CURLOPT_TIMEOUT, 0);
 
-        curl_exec($ch);
+        $output = curl_exec($ch);
         $info = curl_getinfo($ch);
         $final_url = $info['url'];
         $redirect_url = $info['redirect_url'];
-
+        curl_close($ch);
+        
         if (!empty($redirect_url)) {
             return curl_request($redirect_url, $params);
         }
         
         if (strpos($final_url, "127.0.0.1") !== false ) {
-            return ("The final url is <strong>".$final_url.'</strong><br>So this request was not successed unfortunately!<br><h2>If you access from New Zealand, request would be successed!</h2>');
+            return $final_url;
         } else {
-            return "The final url is: <strong>".$final_url."</strong>";
+            return $output;
         }
-        curl_close($ch);
+        
     }
     
     $result = curl_request($url, $params);
-    echo($result);
-    
-    // header("Location: http://localhost/html-contact-form/thank-you.html");
+    if (strpos($result, "127.0.0.1") !== false) echo("The final url is <strong>".$result.'</strong><br>So this request was not successed unfortunately!<br><h2>If you access from New Zealand, request would be successed!</h2>');
+    else {
+        echo $result;
+        // header("Location: http://localhost/html-contact-form/thank-you.html");
+    }
 }
 
 ?>
